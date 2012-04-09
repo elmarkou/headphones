@@ -83,6 +83,7 @@ BLACKHOLE = None
 BLACKHOLE_DIR = None
 USENET_RETENTION = None
 INCLUDE_EXTRAS = False
+AUTOMARK_WANTED = False
 
 SEARCH_INTERVAL = 360
 LIBRARYSCAN_INTERVAL = 300
@@ -146,6 +147,9 @@ XBMC_USERNAME = None
 XBMC_PASSWORD = None
 XBMC_UPDATE = False
 XBMC_NOTIFY = False
+NMA_ENABLED = False
+NMA_APIKEY = None
+NMA_PRIORITY = None
 MIRRORLIST = ["musicbrainz.org","headphones","tbueter.com","custom"]
 MIRROR = None
 CUSTOMHOST = None
@@ -207,7 +211,7 @@ def initialize():
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
-                ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
+                ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, AUTOMARK_WANTED, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
@@ -215,7 +219,7 @@ def initialize():
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
                 ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
-                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY
+                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY
                 
         if __INITIALIZED__:
             return False
@@ -229,6 +233,7 @@ def initialize():
         CheckSection('Newzbin')
         CheckSection('Prowl')
         CheckSection('XBMC')
+        CheckSection('NMA')
         
         # Set global variables based on config file or use defaults
         CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
@@ -271,6 +276,7 @@ def initialize():
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '')
         INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
+        AUTOMARK_WANTED = bool(check_setting_int(CFG, 'General', 'automark_wanted', 1))
         
         SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 360)
         LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
@@ -333,6 +339,9 @@ def initialize():
         XBMC_UPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update', 0))
         XBMC_NOTIFY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify', 0))
         
+        NMA_ENABLED = bool(check_setting_int(CFG, 'NMA', 'nma_enabled', 0))
+        NMA_APIKEY = check_setting_str(CFG, 'NMA', 'nma_apikey', '')
+        NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
         
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
@@ -489,6 +498,7 @@ def config_write():
     new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
     new_config['General']['usenet_retention'] = USENET_RETENTION
     new_config['General']['include_extras'] = int(INCLUDE_EXTRAS)
+    new_config['General']['automark_wanted'] = int(AUTOMARK_WANTED)
     
     new_config['General']['numberofseeders'] = NUMBEROFSEEDERS
     new_config['General']['torrentblackhole_dir'] = TORRENTBLACKHOLE_DIR
@@ -541,6 +551,11 @@ def config_write():
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
     new_config['XBMC']['xbmc_update'] = int(XBMC_UPDATE)
     new_config['XBMC']['xbmc_notify'] = int(XBMC_NOTIFY)
+    
+    new_config['NMA'] = {}
+    new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)
+    new_config['NMA']['nma_apikey'] = NMA_APIKEY
+    new_config['NMA']['nma_priority'] = NMA_PRIORITY
     
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
